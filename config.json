@@ -1,0 +1,13 @@
+{
+    "default_min_interval": 500,
+    "default_max_interval": 1500,
+    "default_hotkey": "ctrl+shift+a",
+    "turbo_min_interval": 1,
+    "turbo_max_interval": 5,
+    "window_title": "KazLabs AutoClicker",
+    "theme": {
+        "primary_color": "#2c3e50",
+        "secondary_color": "#34495e",
+        "text_color": "#ecf0f1"
+    }
+} 

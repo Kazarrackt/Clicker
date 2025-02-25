@@ -1,0 +1,24 @@
+-0.1.0-1- Initial Release 2025-02-24 19:30:00 -
++ : Added main AutoClicker application (app.py:all) - Initial implementation
++ : Added logging system (logger.py:all) - For proper error tracking
++ : Added config.json (config.json:all) - For configuration management
++ : Added turbo mode feature (app.py:toggle_turbo_mode) - For ultra-fast clicking
++ : Added proper error handling (app.py:multiple) - For improved reliability
++ : Added README.md (README.md:all) - For documentation
++ : Added changelog.txt (changelog.txt:all) - For changelog tracking
+
+-0.1.0-2- Update 2025-02-24 20:00:00 -
++ : Added status bar with version, CPS counter, and copyright (app.py:create_status_bar) - For better user feedback
++ : Added real-time CPS tracking (app.py:update_cps) - To monitor clicking speed
++ : Added build script and version info (build.py:all) - For proper executable building
+
+-0.1.0-3- Update 2025-02-24 20:30:00 -
++ : Added StartupChecker class (startup_checks.py:all) - For safety checks and initialization
++ : Added directory cleanliness check (startup_checks.py:check_directory_clean) - For security
++ : Added config auto-creation (startup_checks.py:ensure_config_exists) - For better user experience
++ : Added improved error handling in auto_click (app.py:auto_click) - For reliability
++ : Added consecutive error tracking (app.py:auto_click) - For crash prevention
+
+-0.1.0-4- Update 2025-02-24 21:00:00 -
++ : Added custom window icon support (app.py:__init__) - For branding
+? : Updated build script to include icon (build.py:all) - For icon packaging
