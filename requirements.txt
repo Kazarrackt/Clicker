@@ -1,3 +1,4 @@
 pyautogui
 keyboard
 pyinstaller 
+pywin32
