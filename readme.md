@@ -25,7 +25,7 @@ Edit `config.json` to customize:
 - Default hotkey
 - Turbo mode settings
 - Window title
-- Theme colors
+- Theme colors #NotImplementedYet
 
 ## Logs
 
