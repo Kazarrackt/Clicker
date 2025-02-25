@@ -1,6 +1,6 @@
 # KazLabs AutoClicker
 
-A powerful auto-clicking tool with customizable intervals and turbo mode.
+A dead simple auto-clicking tool with customizable intervals and turbo mode (look it just clicks fast okay...).
 
 ## Features
 
