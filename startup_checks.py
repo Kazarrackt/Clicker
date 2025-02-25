@@ -1,7 +1,7 @@
 # ---
 # KazLabs Media Group
 # Made with ♥ by Liam Sorensen - AI Assisted by Cursor.AI.
-# Version 0.1.0 - 2024-03-19
+# Version 0.1.4 - 2025-02-25
 # ---
 
 import os
@@ -36,20 +36,26 @@ class StartupChecker:
         config_path = os.path.join(self.exe_path, 'config.json')
         try:
             if not os.path.exists(config_path):
-                default_config = {
+                default_config = {            
                     "default_min_interval": 500,
                     "default_max_interval": 1500,
                     "default_hotkey": "ctrl+shift+a",
-                    "turbo_min_interval": 1,
-                    "turbo_max_interval": 5,
+                    "turbo_warning_shown": True,
                     "window_title": "KazLabs AutoClicker",
+                    "dark_mode": True,
                     "theme": {
-                        "primary_color": "#2c3e50",
-                        "secondary_color": "#34495e",
-                        "text_color": "#ecf0f1"
+                        "dark": {
+                            "background": "#0d101d",
+                            "foreground": "#eeeeee",
+                            "accent": "#0d1f4e"
+                        },
+                        "light": {
+                            "background": "#cccccc",
+                            "foreground": "#333333",
+                            "accent": "#5882ee"
+                        }
                     }
                 }
-                
                 with open(config_path, 'w') as f:
                     json.dump(default_config, f, indent=4)
                 self.logger.info("Created default config.json")

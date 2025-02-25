@@ -2,12 +2,19 @@
     "default_min_interval": 500,
     "default_max_interval": 1500,
     "default_hotkey": "ctrl+shift+a",
-    "turbo_min_interval": 1,
-    "turbo_max_interval": 5,
+    "turbo_warning_shown": true,
     "window_title": "KazLabs AutoClicker",
+    "dark_mode": true,
     "theme": {
-        "primary_color": "#2c3e50",
-        "secondary_color": "#34495e",
-        "text_color": "#ecf0f1"
+        "dark": {
+            "background": "#0d101d",
+            "foreground": "#eeeeee",
+            "accent": "#0d1f4e"
+        },
+        "light": {
+            "background": "#cccccc",
+            "foreground": "#333333",
+            "accent": "#5882ee"
+        }
     }
-} 
+}

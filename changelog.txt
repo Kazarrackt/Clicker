@@ -2,7 +2,7 @@
 + : Added main AutoClicker application (app.py:all) - Initial implementation
 + : Added logging system (logger.py:all) - For proper error tracking
 + : Added config.json (config.json:all) - For configuration management
-+ : Added turbo mode feature (app.py:toggle_turbo_mode) - For ultra-fast clicking
++ : Added turbo mode feature (app.py:toggle_turbo_mode) - For fast clicking
 + : Added proper error handling (app.py:multiple) - For improved reliability
 + : Added README.md (README.md:all) - For documentation
 + : Added changelog.txt (changelog.txt:all) - For changelog tracking
@@ -22,3 +22,24 @@
 -0.1.0-4- Update 2025-02-24 21:00:00 -
 + : Added custom window icon support (app.py:__init__) - For branding
 ? : Updated build script to include icon (build.py:all) - For icon packaging
+
+-0.1.2-1- Update 2025-02-25 10:00:00 -
++ : Added dark mode support (app.py:apply_theme) - Because light mode is for psychopaths
++ : Added theme persistence (app.py:apply_theme) - So you don't have to pick dark mode every time
+? : Updated config.json with theme settings (config.json:all) - More stuff to break
++ : Added sarcastic comments (app.py:multiple) - Because why not
+
+-0.1.2-2- Update 2025-02-25 10:32:00
++ : Added multi-threaded turbo clicking (app.py:turbo_click_worker) - Because single-thread clicking is for casuals (and it wasn't fast enough)
++ : Added click position cycling (app.py:click_positions) - To trick Windows into accepting more clicks
++ : Added turbo mode warning (app.py:toggle_turbo_mode) - To avoid liability for melted CPUs
+? : Updated config with aggressive turbo settings (config.json:all) - Now with more BRRRRRR
+
+-0.1.3- Update 2025-02-25 11:30:00 -
+? : Fixed theme styling (app.py:apply_theme) - Because being able to read is apparently important
+? : Updated color schemes (config.json:theme) - Now with less eye-bleeding
++ : Added status bar specific styling (app.py:create_status_bar) - For that professional look™
+
+-0.1.4- Update 2025-02-25 12:00:00 -
+? : Fixed config.json (config.json:all) - Because it was a mess
+? : Fixed Themeing Issues (app.py:apply_theme) - Because I was lazy and didn't do it properly first time

@@ -20,7 +20,7 @@ VSVersionInfo(
         StringStruct(u'LegalCopyright', u'© 2025 KazLabs'),
         StringStruct(u'OriginalFilename', u'KazLabs-AutoClicker.exe'),
         StringStruct(u'ProductName', u'KazLabs AutoClicker'),
-        StringStruct(u'ProductVersion', u'0.1.0')])
+        StringStruct(u'ProductVersion', u'0.1.4')])
     ]),
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]

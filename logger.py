@@ -1,7 +1,7 @@
 # ---
 # KazLabs Media Group
 # Made with ♥ by Liam Sorensen - AI Assisted by Cursor.AI.
-# Version 0.1.0 - 2024-03-19
+# Version 0.1.4 - 2025-02-25
 # ---
 
 import logging

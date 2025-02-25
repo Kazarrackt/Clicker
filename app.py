@@ -1,7 +1,7 @@
 # ---
 # KazLabs Media Group
 # Made with ♥ by Liam Sorensen - AI Assisted by Cursor.AI.
-# Version 0.1.0 - 2024-03-19
+# Version 0.1.4 - 2025-02-25
 # ---
 
 import tkinter as tk
@@ -17,6 +17,10 @@ import sys
 from datetime import datetime, timedelta
 from startup_checks import StartupChecker
 import os
+import tkinter.font as tkFont
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor
+from itertools import cycle
 
 class AutoClicker:
     def __init__(self, root):
@@ -66,11 +70,72 @@ class AutoClicker:
         # Configure error handling for pyautogui
         pyautogui.FAILSAFE = True
         
+        # Oh look, we're setting up themes... because apparently light mode wasn't painful enough
+        self.style = ttk.Style()
+        self.dark_mode = tk.BooleanVar(value=self.config.get("dark_mode", True))
+        self.apply_theme()
+        
+        # For turbo mode threading
+        self.num_threads = multiprocessing.cpu_count() * 2  # Because why not use ALL the cores
+        self.thread_pool = None
+        self.click_positions = cycle([(0,0), (1,0), (-1,0), (0,1)])  # Micro-offsets to trick Windows
+        
         self.create_widgets()
         self.create_status_bar()
         self.update_hotkey()
         self.update_cps()
         
+    def apply_theme(self):
+        """
+        Applies theme because apparently black text on white background was too mainstream
+        Is it messy? Yes. Does it work? Also yes.
+        """
+        try:
+            theme = self.config["theme"]["dark" if self.dark_mode.get() else "light"]
+            
+            # Configure root window
+            self.root.configure(bg=theme["background"])
+            
+            # Configure all ttk styles
+            self.style.configure("TFrame", background=theme["background"])
+            self.style.configure("TLabel", 
+                background=theme["background"],
+                foreground=theme["foreground"])
+            self.style.configure("TButton",
+                background=theme["accent"],
+                foreground=theme["foreground"])
+            self.style.configure("TCheckbutton",
+                background=theme["background"],
+                foreground=theme["foreground"])
+            self.style.configure("TEntry",
+                fieldbackground=theme["accent"],
+                foreground="#111111")
+            
+            # Configure status bar specifically
+            self.style.configure("Status.TFrame",
+                background=theme["accent"])
+            self.style.configure("Status.TLabel",
+                background=theme["accent"],
+                foreground=theme["foreground"])
+            
+            # Update status bar widgets if they exist
+            if hasattr(self, 'status_bar'):
+                self.status_bar.configure(style="Status.TFrame")
+                self.version_label.configure(style="Status.TLabel")
+                self.cps_label.configure(style="Status.TLabel")
+                self.copyright_label.configure(style="Status.TLabel")
+            
+            # Save preference to config because we're nice like that
+            self.config["dark_mode"] = self.dark_mode.get()
+            try:
+                with open('config.json', 'w') as f:
+                    json.dump(self.config, f, indent=4)
+            except Exception as e:
+                self.logger.error(f"Failed to save theme preference because life is hard: {str(e)}")
+            
+        except Exception as e:
+            self.logger.error(f"Theme application failed spectacularly: {str(e)}")
+    
     def create_widgets(self):
         frame = ttk.Frame(self.root, padding="10")
         frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -86,7 +151,7 @@ class AutoClicker:
         
         # Add Turbo Mode checkbox
         self.turbo_var = tk.BooleanVar()
-        ttk.Checkbutton(frame, text="Turbo Mode (Ultra Fast)", 
+        ttk.Checkbutton(frame, text="Turbo Mode (Fast)", 
                        variable=self.turbo_var, 
                        command=self.toggle_turbo_mode).grid(row=3, column=0, columnspan=2)
         
@@ -96,23 +161,28 @@ class AutoClicker:
         self.update_hotkey_button = ttk.Button(frame, text="Update Hotkey", command=self.update_hotkey)
         self.update_hotkey_button.grid(row=5, column=0, columnspan=2, pady=10)
         
+        # Add theme toggle because why not make this more complicated
+        ttk.Checkbutton(frame, text="Dark Mode (For your precious eyes)", 
+                       variable=self.dark_mode, 
+                       command=self.apply_theme).grid(row=6, column=0, columnspan=2)
+        
         for child in frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
         
     def create_status_bar(self):
-        self.status_bar = ttk.Frame(self.root)
+        self.status_bar = ttk.Frame(self.root, style="Status.TFrame")
         self.status_bar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         
         # Version label (left)
-        self.version_label = ttk.Label(self.status_bar, text="v0.1.0")
+        self.version_label = ttk.Label(self.status_bar, text="v0.1.3", style="Status.TLabel")
         self.version_label.pack(side=tk.LEFT, padx=5)
         
         # CPS label (center)
-        self.cps_label = ttk.Label(self.status_bar, text="0.0 CPS")
+        self.cps_label = ttk.Label(self.status_bar, text="0.0 CPS", style="Status.TLabel")
         self.cps_label.pack(side=tk.LEFT, expand=True)
         
         # Copyright label (right)
-        self.copyright_label = ttk.Label(self.status_bar, text="© 2025 - Kazlabs")
+        self.copyright_label = ttk.Label(self.status_bar, text="© 2025 - Kazlabs", style="Status.TLabel")
         self.copyright_label.pack(side=tk.RIGHT, padx=5)
     
     def update_cps(self):
@@ -132,13 +202,34 @@ class AutoClicker:
         self.root.after(100, self.update_cps)
     
     def toggle_turbo_mode(self):
+        """
+        Toggles turbo mode. Warning: May cause CPU meltdown, Windows crashes, 
+        and your mouse driver to file for retirement.
+        """
         self.is_turbo = self.turbo_var.get()
         if self.is_turbo:
-            self.logger.info("Turbo mode enabled")
+            if not self.config.get("turbo_warning_shown", False):
+                result = messagebox.askokcancel("Turbo Mode Warning",
+                    "Warning: Turbo mode will attempt to achieve 1000+ CPS.\n\n" +
+                    "Side effects may include:\n" +
+                    "- CPU screaming in agony\n" +
+                    "- Windows having an existential crisis\n" +
+                    "- You questioning your life choices\n\n" +
+                    "Continue anyway?")
+                
+                if not result:
+                    self.turbo_var.set(False)
+                    return
+                    
+                self.config["turbo_warning_shown"] = True
+                with open('config.json', 'w') as f:
+                    json.dump(self.config, f, indent=4)
+            
+            self.logger.warning("Turbo mode enabled - May God have mercy on your CPU")
             self.min_interval.set(self.config["turbo_min_interval"])
             self.max_interval.set(self.config["turbo_max_interval"])
         else:
-            self.logger.info("Turbo mode disabled")
+            self.logger.info("Turbo mode disabled - Your CPU can rest now")
             self.min_interval.set(self.config["default_min_interval"])
             self.max_interval.set(self.config["default_max_interval"])
     
@@ -168,37 +259,76 @@ class AutoClicker:
             self.logger.error(f"Error in toggle: {str(e)}")
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
     
-    def auto_click(self):
-        click_errors = 0  # Track consecutive errors
-        while self.is_running:
-            try:
-                if click_errors > 5:  # Stop if too many errors occur
-                    self.logger.error("Too many consecutive click errors, stopping auto-clicker")
-                    self.is_running = False
-                    self.root.after(0, lambda: messagebox.showerror(
-                        "Error", "Auto-clicking stopped due to too many errors"))
+    def turbo_click_worker(self):
+        """
+        Worker function that clicks like it's getting paid per click.
+        Does this break Windows? Probably. Do we care? Not really.
+        """
+        try:
+            while self.is_running:
+                if not self.is_turbo:
                     break
                     
-                interval = random.uniform(self.min_interval.get(), self.max_interval.get()) / 1000.0
-                time.sleep(interval)
-                
-                # Check if mouse is in a corner (failsafe)
+                # Add tiny offset to trick Windows into processing more clicks
+                offset_x, offset_y = next(self.click_positions)
                 x, y = pyautogui.position()
-                if x in [0, pyautogui.size().width-1] and y in [0, pyautogui.size().height-1]:
-                    self.logger.warning("Failsafe triggered - mouse in corner")
-                    self.is_running = False
-                    self.root.after(0, lambda: messagebox.showwarning(
-                        "Warning", "Auto-clicking stopped - mouse moved to corner"))
-                    break
-                
-                pyautogui.click()
+                pyautogui.click(x + offset_x, y + offset_y)
                 self.click_count += 1
-                click_errors = 0  # Reset error counter on successful click
                 
+        except Exception as e:
+            self.logger.error(f"Turbo worker died (RIP): {str(e)}")
+    
+    def auto_click(self):
+        """
+        The main clicking loop. Now with 1000% more clicking!
+        Normal mode: Does what it says on the tin
+        Turbo mode: Attempts to melt your CPU and possibly anger Windows
+        """
+        click_errors = 0  # Track consecutive errors. I'm not that persistent.
+        
+        if self.is_turbo:
+            try:
+                # Create thread pool for maximum clickage
+                self.logger.warning("Initiating nuclear click protocol...")
+                with ThreadPoolExecutor(max_workers=self.num_threads) as self.thread_pool:
+                    # Launch ALL the threads!
+                    futures = [self.thread_pool.submit(self.turbo_click_worker) 
+                             for _ in range(self.num_threads)]
+                    
+                    # Wait for threads to finish (they won't) maybe...
+                    for future in futures:
+                        future.result()
+                        
             except Exception as e:
-                self.logger.error(f"Error in auto_click: {str(e)}")
-                click_errors += 1
-                time.sleep(1)  # Wait a bit before retrying
+                self.logger.error(f"Turbo mode crashed and burned: {str(e)}")
+                self.is_running = False
+                self.root.after(0, lambda: messagebox.showerror(
+                    "Error", "Turbo mode failed spectacularly!"))
+                
+        else:
+            # Normal clicking mode... boring but reliable
+            while self.is_running:
+                try:
+                    interval = random.uniform(self.min_interval.get(), self.max_interval.get()) / 1000.0
+                    time.sleep(interval)
+                    
+                    # Check if mouse is in a corner (failsafe). Blame the cat.
+                    x, y = pyautogui.position()
+                    if x in [0, pyautogui.size().width-1] and y in [0, pyautogui.size().height-1]:
+                        self.logger.warning("Failsafe triggered - mouse in corner")
+                        self.is_running = False
+                        self.root.after(0, lambda: messagebox.showwarning(
+                            "Warning", "Auto-clicking stopped - mouse moved to corner"))
+                        break
+                    
+                    pyautogui.click()
+                    self.click_count += 1
+                    click_errors = 0  # Reset error counter on successful click
+                    
+                except Exception as e:
+                    self.logger.error(f"Error in auto_click: {str(e)}")
+                    click_errors += 1
+                    time.sleep(1)  # Wait a bit before retrying cause windows is a bitch and hates me. 
 
 if __name__ == "__main__":
     try:
